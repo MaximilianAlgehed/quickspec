@@ -58,7 +58,7 @@ deriving instance Typeable Arbitrary
 deriving instance Typeable CoArbitrary
 deriving instance Typeable Gen
 
-type PrunerType = Completion
+type PrunerType = SimplePruner -- Completion
 
 data Signature =
   Signature {
