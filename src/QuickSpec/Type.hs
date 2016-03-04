@@ -14,7 +14,7 @@ module QuickSpec.Type(
   TypeView(..),
   Apply(..), apply, canApply,
   -- Polymorphic types.
-  Poly, poly, unPoly, polyTyp, polyMap, polyApply, polyPair, polyList, polyMgu,
+  Poly, poly, unPoly, polyTyp, polyMap, polyRename, polyApply, polyPair, polyList, polyMgu,
   -- Dynamic values.
   Value, toValue, fromValue,
   Unwrapped(..), unwrap, Wrapper(..),
@@ -227,7 +227,9 @@ infixl `apply`
 apply :: Apply a => a -> a -> a
 apply f x =
   case tryApply f x of
-    Nothing -> ERROR("apply: ill-typed term")
+    Nothing ->
+      ERROR("apply: ill-typed term: can't apply " ++
+            prettyShow (typ f) ++ " to " ++ prettyShow (typ x))
     Just y -> y
 
 canApply :: Apply a => a -> a -> Bool
@@ -271,11 +273,14 @@ polyTyp (Poly x) = Poly (typ x)
 polyMap :: (Typed a, Typed b) => (a -> b) -> Poly a -> Poly b
 polyMap f (Poly x) = poly (f x)
 
-polyApply :: (Typed a, Typed b, Typed c) => (a -> b -> c) -> Poly a -> Poly b -> Poly c
-polyApply f (Poly x) (Poly y) = poly (f x y')
+polyRename :: (Typed a, Typed b) => a -> Poly b -> b
+polyRename x (Poly y) =
+  typeSubst (\(MkVar n) -> var (MkVar (k+n))) y
   where
-    y' = typeSubst (\(MkVar n) -> var (MkVar (k+n))) y
     k  = maximum (fmap bound (typesDL x))
+
+polyApply :: (Typed a, Typed b, Typed c) => (a -> b -> c) -> Poly a -> Poly b -> Poly c
+polyApply f (Poly x) y = poly (f x (polyRename x y))
 
 polyPair :: (Typed a, Typed b) => Poly a -> Poly b -> Poly (a, b)
 polyPair = polyApply (,)
