@@ -28,7 +28,7 @@ import Data.Ord
 import {-# SOURCE #-} QuickSpec.Pruning.Completion(Completion)
 import {-# SOURCE #-} QuickSpec.Pruning.Simple(SimplePruner)
 import Twee.Base
-import qualified QuickSpec.Label as Label
+import qualified Twee.Label as Label
 import QuickSpec.Instances
 
 deriving instance Typeable Ord
